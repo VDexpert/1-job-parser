@@ -8,9 +8,13 @@ class Connector:
     внешнего деградации
     """
     __data_file = None
+    all_connectors = {}
+    counting_prod = 0
 
-    def __init__(self, df):
-        self.__data_file = df
+    def __init__(self, filename):
+        self.counting_prod += 1
+        self.all_connectors[filename] = self
+        self.__data_file = filename
         self.__connect()
 
     @property
@@ -46,8 +50,8 @@ class Connector:
         """
         with open(self.__data_file, "r") as f:
             source_data = self.__connect()
-            source_data += data
-            source_data = [data]
+            print(type(data))
+            source_data += [data]
             with open(self.__data_file, "w") as outfile:
                 json.dump(source_data, outfile, indent=2)
 
