@@ -69,7 +69,7 @@ class SuperJob(Engine):
 
             dump = [{"items": prev_vac}]
             with open("temp_file.json", "w") as temp_f:
-                json.dump(dump, temp_f)
+                json.dump(dump, temp_f, indent=2)
 
             with open("temp_file.json", "r") as temp_r_f:
                 out_data = json.load(temp_r_f)
