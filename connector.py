@@ -68,14 +68,13 @@ class Connector:
             key_filter = [x for x in query.keys()]
             value_filter = [x for x in query.values()]
             if not query or not value_filter:
-                print("Исходные данные")
                 return source_data
             else:
                 res_data = []
                 for item in source_data:
-                    if item[key_filter[0]] == value_filter[0]:
-                        res_data.append(item)
-                print("Селективные данные")
+                    for i in item["items"]:
+                        if i[key_filter[0]] == value_filter[0]:
+                            res_data.append(i)
                 return res_data
 
 
@@ -95,24 +94,10 @@ class Connector:
             else:
                 res_data = []
                 for item in source_data:
-                    if item[key_filter[0]] == value_filter[0]:
-                        continue
+                    for i in item["items"]:
+                        if i[key_filter[0]] == value_filter[0]:
+                            continue
                     else:
                         res_data.append(item)
                 with open(self.__data_file, "w") as outfile:
                     json.dump(res_data, outfile, indent=2)
-
-
-
-if __name__ == '__main__':
-    df = Connector('df.json')
-
-    data_for_file = {'id': 1, 'title': 'tet'}
-
-    df.insert(data_for_file)
-    data_from_file = df.select(dict())
-    assert data_from_file == [data_for_file]
-
-    df.delete({'id':1})
-    data_from_file = df.select(dict())
-    assert data_from_file == []
