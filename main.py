@@ -120,8 +120,8 @@ def starter():
                 file_writer.writerow([str(i)])
         print("\n", "*" * 10, f"ТОП-{top_count} вакансий загружены в файл {outfile_sj_top}", "*" * 10, "\n")
 
-    del_temp_json(hh.filename)
-    del_temp_json(sj.filename)
+    # del_temp_json(hh.filename)
+    # del_temp_json(sj.filename)
 
     return True
 

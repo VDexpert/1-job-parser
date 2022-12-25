@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import requests as rq
 from connector import Connector
 from bs4 import BeautifulSoup
-
+from urllib.request import urlopen
+import re
 
 class Engine(ABC):
     all_engines = {}
@@ -70,9 +71,14 @@ class HH(Engine):
         res_data = []
 
         for i in orig_data:
+            id = i["id"]
             name = i["name"]
             href = i["alternate_url"]
             company = i["employer"]["name"]
+
+            vac = rq.get(self.__url + "/" + id)
+            experience = vac.json()["experience"]["name"].lower()
+
             description = i["snippet"]["responsibility"]
             salary = "По договорённости"
             rate_salary = 1
@@ -89,21 +95,16 @@ class HH(Engine):
 
             if i["salary"]:
                 if i["salary"]["from"] and i["salary"]["to"]:
-                    salary = str(round(i["salary"]["from"] / rate_salary)) + "\u2014" + str(round(i["salary"]["to"] / rate_salary))
+                    salary = str(round(i["salary"]["from"] / rate_salary)) + \
+                             "\u2014" + str(round(i["salary"]["to"] / rate_salary))
                 elif i["salary"]["from"] and not i["salary"]["to"]:
                     salary = "от" + str(round(i["salary"]["from"] / rate_salary))
                 elif not i["salary"]["from"] and i["salary"]["to"]:
                     salary = "до" + str(round(i["salary"]["to"] / rate_salary))
 
             res_data.append(
-                {
-                    "name": name,
-                    "href": href,
-                    "company": company,
-                    "salary": salary,
-                    "description": description
-                }
-            )
+                {"name": name, "href": href, "experience": experience, "company": company, "salary": salary,
+                 "description": description})
             self.count += 1
             if self.count == self.quantity:
                 break
@@ -123,6 +124,13 @@ class SuperJob(Engine):
     def get_request(self, page):
         url = f"{self.__url}{self.key_word}&page={page}"
         r = rq.get(url)
+        container_exper = {
+            "Опыт работы от 3 лет": "от 3 до 6 лет",
+            "Опыт работы от 1 года": "от 1 года до 3 лет",
+            "Опыт работы не требуется": "нет опыта",
+            "Опыт не нужен": "нет опыта",
+            "Опыт работы от 6 лет": "более 6 лет"
+        }
         if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
             items = soup.find_all("div", class_="f-test-search-result-item")
@@ -130,25 +138,42 @@ class SuperJob(Engine):
 
             for item in items:
                 try:
+                    name = item.find("span", class_="_2s70W").find("a", class_="_1IHWd").get_text()
+                    href = "https://russia.superjob.ru" + item.find("a", class_="_1IHWd").get("href")
+                    company = item.find("span", class_="_3nMqD").find("a", class_="_1IHWd").get_text()
+
+                    html = urlopen(href).read()
+                    soup = BeautifulSoup(html, features="html.parser")
+
+                    for script in soup(["script", "style"]):
+                        script.extract()
+
+                    text = soup.get_text()
+                    lines = (line.strip() for line in text.splitlines())
+                    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+                    text = '\n'.join(chunk for chunk in chunks if chunk)
+
+                    for i in container_exper:
+                        match = re.findall(i, text)
+                        if match:
+                            experience = container_exper[i]
+                            break
+
                     salary = " ".join(item.find("span", "_2eYAG _1B2ot _3EXZS _3pAka _3GChV").get_text().split("\xa0"))
                     if salary != "По договорённости":
                         salary = salary[0:-2]
                         salary = salary.replace(" ", "")
+                    description = item.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
 
                     prev_vac.append(
-                        {
-                            "name": item.find("span", class_="_2s70W").find("a", class_="_1IHWd").get_text(),
-                            "href": "https://russia.superjob.ru" + item.find("a", class_="_1IHWd").get("href"),
-                            "company": item.find("span", class_="_3nMqD").find("a", class_="_1IHWd").get_text(),
-                            "salary": salary,
-                            "description": item.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
-                        }
-                    )
+                        {"name": name, "href": href, "company": company, "experience": experience,
+                         "salary": salary, "description": description})
+
                     self.count += 1
                     if self.count == self.quantity:
                         break
 
-                except AttributeError:
+                except Exception:
                     continue
 
             self.get_connector(self.filename)
@@ -158,8 +183,8 @@ class SuperJob(Engine):
 
 
 if __name__ == "__main__":
-    hh1 = HH(100)
+    hh1 = HH(100, "python")
     hh1.get_request(1)
 
-    sj1 = SuperJob(30)
+    sj1 = SuperJob(80, "python")
     sj1.get_request(1)
