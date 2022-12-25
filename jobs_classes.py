@@ -16,10 +16,10 @@ class Vacancy:
             self.salary = salary[0:2] + " " + salary[2:]
         self.description = description
         self.__filename = filename
-        if self.__class__.__name__ == "HH":
+        if self.__class__.__name__ == "HHVacancy":
             self.hh_vacancies.append(self)
             self.count = len(self.hh_vacancies)
-        elif self.__class__.__name__ == "SuperJob":
+        elif self.__class__.__name__ == "SJVacancy":
             self.sj_vacancies.append(self)
             self.count = len(self.sj_vacancies)
         self.step_iter = 1
@@ -67,35 +67,34 @@ class CountMixin:
         """
         data = Connector.all_connectors[filename].connect()
         count = 0
-        for item in data:
-            for i in item["items"]:
-                count += 1
-            return count
+        for i in data:
+            count += 1
+        return count
 
 
-class HH(Vacancy, CountMixin):
+class HHVacancy(Vacancy, CountMixin):
     """ HeadHunter Vacancy """
     pass
 
 
 
-class SuperJob(Vacancy, CountMixin):
+class SJVacancy(Vacancy, CountMixin):
     """ SuperJob Vacancy """
     pass
 
 
-def sorting(vacancies, reversed=False):
+def sorting(vacancies, order):
     """ Должен сортировать любой список вакансий по ежемесячной оплате (gt, lt magic methods) """
-    if reversed:
+    if order == "desc":
         vacancies.sort(reverse=True)
-    else:
+    elif order == "asc":
         vacancies.sort()
     return vacancies
 
 
-def get_top(vacancies, top_count):
+def get_top(vacancies, top_count, order):
     """ Должен возвращать {top_count} записей из вакансий по зарплате (iter, next magic methods) """
-    vacancies = sorting(vacancies, reversed=True)
+    vacancies = sorting(vacancies, order)
     result = []
     count = 0
     for i in vacancies:
@@ -106,13 +105,12 @@ def get_top(vacancies, top_count):
     return result
 
 if __name__ == "__main__":
-    connector_sj = Connector("SuperJob-dump-keyword-python")
+    connector_sj = Connector("SuperJob-dump-keyword-None-250")
     data = connector_sj.connect()
-    for item in data:
-        for i in item["items"]:
-            SuperJob(i["name"], i["href"], i["company"], i["salary"], i["description"],
-                      "SuperJob-dump-keyword-python")
-
+    for i in data:
+        SJVacancy(i["name"], i["href"], i["company"], i["salary"], i["description"],
+                  "SuperJob-dump-keyword-None-250")
+    print(len(data))
     sorting(Vacancy.sj_vacancies)
     for i in Vacancy.sj_vacancies:
         print(i)

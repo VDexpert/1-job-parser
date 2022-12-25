@@ -48,8 +48,7 @@ class Connector:
         """
         with open(self.__data_file, "r") as f:
             source_data = self.connect()
-            print(type(data))
-            source_data += [data]
+            source_data += data
             with open(self.__data_file, "w") as outfile:
                 json.dump(source_data, outfile, indent=2)
 
@@ -69,13 +68,10 @@ class Connector:
                 return source_data
             else:
                 res_data = []
-                for item in source_data:
-                    for i in item["items"]:
-                        if i[key_filter[0]] == value_filter[0]:
-                            res_data.append(i)
+                for i in source_data:
+                    if i[key_filter[0]] == value_filter[0]:
+                        res_data.append(i)
                 return res_data
-
-
 
     def delete(self, query):
         """
@@ -91,11 +87,23 @@ class Connector:
                 print("Не переданы параметры для удаления")
             else:
                 res_data = []
-                for item in source_data:
-                    for i in item["items"]:
-                        if i[key_filter[0]] == value_filter[0]:
-                            continue
+                for i in source_data:
+                    if i[key_filter[0]] == value_filter[0]:
+                        continue
                     else:
-                        res_data.append(item)
+                        res_data.append(i)
                 with open(self.__data_file, "w") as outfile:
                     json.dump(res_data, outfile, indent=2)
+
+if __name__ == "__main__":
+    df = Connector('df.json')
+
+    data_for_file = [{'id': 1, 'title': 'tet'}]
+
+    df.insert(data_for_file)
+    data_from_file = df.select(dict())
+    assert data_from_file == data_for_file
+
+    df.delete({'id': 1})
+    data_from_file = df.select(dict())
+    assert data_from_file == []

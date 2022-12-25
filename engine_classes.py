@@ -5,7 +5,15 @@ from bs4 import BeautifulSoup
 
 
 class Engine(ABC):
-    __key_word = "python"
+    all_engines = {}
+
+    def __init__(self, quantity, key_word):
+        self.__quantity = quantity
+        self.__count = 0
+        self.__key_word = key_word
+        self.__filename = f"JSON-{self.__class__.__name__}-dump-keyword-{self.key_word}-{quantity}"
+        self.all_engines[self.__filename] = self
+
 
     @abstractmethod
     def get_request(self):
@@ -17,8 +25,22 @@ class Engine(ABC):
         return Connector(filename)
 
     @property
+    def quantity(self):
+        return self.__quantity
+
+    @property
+    def count(self):
+        return self.__count
+
+    @count.setter
+    def count(self, value):
+        self.__count = value
+
+    def __radd__(self, other):
+        return self.__count + other
+
+    @property
     def filename(self):
-        self.__filename = f"{self.__class__.__name__}-dump-keyword-{self.key_word}"
         return self.__filename
 
     @property
@@ -46,6 +68,7 @@ class HH(Engine):
 
         orig_data = r.json()["items"]
         res_data = []
+
         for i in orig_data:
             name = i["name"]
             href = i["alternate_url"]
@@ -81,22 +104,25 @@ class HH(Engine):
                     "description": description
                 }
             )
+            self.count += 1
+            if self.count == self.quantity:
+                break
 
-        dump = {"items": res_data}
         self.get_connector(self.filename)
-        Connector.all_connectors[self.filename].insert(dump)
+        Connector.all_connectors[self.filename].insert(res_data)
 
 
 class SuperJob(Engine):
     __url = f"https://russia.superjob.ru/vacancy/search/?keywords="
-    __per_page = 40
+    __per_page = 37
 
     @property
     def per_page(self):
         return self.__per_page
 
     def get_request(self, page):
-        r = rq.get(f"{self.__url}{self.key_word}&page={page}")
+        url = f"{self.__url}{self.key_word}&page={page}"
+        r = rq.get(url)
         if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
             items = soup.find_all("div", class_="f-test-search-result-item")
@@ -118,19 +144,22 @@ class SuperJob(Engine):
                             "description": item.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
                         }
                     )
+                    self.count += 1
+                    if self.count == self.quantity:
+                        break
+
                 except AttributeError:
                     continue
 
-            dump = {"items": prev_vac}
             self.get_connector(self.filename)
-            Connector.all_connectors[self.filename].insert(dump)
+            Connector.all_connectors[self.filename].insert(prev_vac)
         else:
             raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {r.status_code}")
 
 
 if __name__ == "__main__":
-    hh1 = HH()
+    hh1 = HH(100)
     hh1.get_request(1)
 
-    sj1 = SuperJob()
+    sj1 = SuperJob(30)
     sj1.get_request(1)
