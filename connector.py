@@ -9,13 +9,11 @@ class Connector:
     """
     __data_file = None
     all_connectors = {}
-    counting_prod = 0
 
     def __init__(self, filename):
-        self.counting_prod += 1
         self.all_connectors[filename] = self
         self.__data_file = filename
-        self.__connect()
+        self.connect()
 
     @property
     def data_file(self):
@@ -24,9 +22,9 @@ class Connector:
     @data_file.setter
     def data_file(self, value):
         self.__data_file = value
-        self.__connect()
+        self.connect()
 
-    def __connect(self):
+    def connect(self):
         """
         Проверка на существование файла с данными и
         создание его при необходимости
@@ -49,7 +47,7 @@ class Connector:
         Запись данных в файл с сохранением структуры и исходных данных
         """
         with open(self.__data_file, "r") as f:
-            source_data = self.__connect()
+            source_data = self.connect()
             print(type(data))
             source_data += [data]
             with open(self.__data_file, "w") as outfile:
@@ -64,7 +62,7 @@ class Connector:
         и вернуть все строки, в которых цена 1000
         """
         with open(self.__data_file, "r") as f:
-            source_data = self.__connect()
+            source_data = self.connect()
             key_filter = [x for x in query.keys()]
             value_filter = [x for x in query.values()]
             if not query or not value_filter:
@@ -86,7 +84,7 @@ class Connector:
         функция удаления не сработает
         """
         with open(self.__data_file, "r") as f:
-            source_data = self.__connect()
+            source_data = self.connect()
             key_filter = [x for x in query.keys()]
             value_filter = [x for x in query.values()]
             if not query or not value_filter:

@@ -17,6 +17,11 @@ class Engine(ABC):
         return Connector(filename)
 
     @property
+    def filename(self):
+        self.__filename = f"{self.__class__.__name__}-dump-keyword-{self.key_word}"
+        return self.__filename
+
+    @property
     def key_word(self):
         return self.__key_word
 
@@ -78,9 +83,8 @@ class HH(Engine):
             )
 
         dump = {"items": res_data}
-        filename = f"HH-dump-keyword-{self.key_word}"
-        self.get_connector(filename)
-        Connector.all_connectors[filename].insert(dump)
+        self.get_connector(self.filename)
+        Connector.all_connectors[self.filename].insert(dump)
 
 
 class SuperJob(Engine):
@@ -118,9 +122,8 @@ class SuperJob(Engine):
                     continue
 
             dump = {"items": prev_vac}
-            filename = f"SJ-dump-keyword-{self.key_word}"
-            self.get_connector(filename)
-            Connector.all_connectors[filename].insert(dump)
+            self.get_connector(self.filename)
+            Connector.all_connectors[self.filename].insert(dump)
         else:
             raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {r.status_code}")
 
