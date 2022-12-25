@@ -11,7 +11,7 @@ def starter():
 
     quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [1000]: ")
     if quantity_vac == "":
-        quantity_vac = 250
+        quantity_vac = 1000
 
     hh = HH(quantity_vac, key_word)
     sj = SuperJob(quantity_vac, key_word)
