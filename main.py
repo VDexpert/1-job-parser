@@ -1,7 +1,9 @@
+
 from engine_classes import*
 from jobs_classes import*
 import csv
 from del_temp_file import*
+from write_to_outfile import write_vac_to_outfile
 
 def starter():
     key_word = input("Введите ключевое слово, по которому будем искать вакансии [python]: ")
@@ -19,47 +21,41 @@ def starter():
     range_sj = quantity_vac // sj.per_page + 2
 
     print("\n", "*"*10, "Парсинг данных с сайта hh.ru", "*"*10, "\n")
-    for i in range(1, range_hh):
-        hh.get_request(i)
+    for page in range(1, range_hh):
+        hh.get_request(page)
 
     data_hh = Connector.all_connectors[hh.filename].connect()
     count_hh = 0
     print("\n", "*" * 10, "Форматирование данных с сайта hh.ru", "*" * 10, "\n")
-    for i in data_hh:
+    for vac in data_hh:
         count_hh += 1
-        HHVacancy(name=i["name"], href=i["href"], company=i["company"], experience=i["experience"],
-                  salary=i["salary"], description=i["description"], filename=hh.filename)
+        HHVacancy(name=vac["name"], href=vac["href"], company=vac["company"], experience=vac["experience"],
+                  salary=vac["salary"], description=vac["description"], filename=hh.filename)
         if count_hh == quantity_vac:
             break
 
     outfile_hh = f"HH-vacancies-{hh.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_hh}", "*" * 10, "\n")
-    with open(outfile_hh, "w", encoding="utf-8") as f:
-        for i in Vacancy.hh_vacancies:
-            file_writer = csv.writer(f)
-            file_writer.writerow([str(i)])
+    write_vac_to_outfile(Vacancy.hh_vacancies, outfile_hh)
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_hh}", "*" * 10, "\n")
 
     print("\n", "*" * 10, "Парсинг данных с сайта superjob.ru", "*" * 10, "\n")
-    for i in range(1, range_sj):
-        sj.get_request(i)
+    for page in range(1, range_sj):
+        sj.get_request(page)
 
     data_sj = Connector.all_connectors[sj.filename].connect()
     count_sj = 0
     print("\n", "*" * 10, "Форматирование данных с сайта superjob.ru", "*" * 10, "\n")
-    for i in  data_sj:
+    for vac in  data_sj:
         count_sj += 1
-        SJVacancy(name=i["name"], href=i["href"], company=i["company"], experience=i["experience"],
-                  salary=i["salary"], description=i["description"], filename=sj.filename)
+        SJVacancy(name=vac["name"], href=vac["href"], company=vac["company"], experience=vac["experience"],
+                  salary=vac["salary"], description=vac["description"], filename=sj.filename)
         if count_sj == quantity_vac:
             break
 
     outfile_sj = f"SJ-vacancies-{sj.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_sj}", "*" * 10, "\n")
-    with open(outfile_sj, "w", encoding="utf-8") as f:
-        for i in Vacancy.sj_vacancies:
-            file_writer = csv.writer(f)
-            file_writer.writerow([str(i)])
+    write_vac_to_outfile(Vacancy.sj_vacancies, outfile_sj)
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_sj}", "*" * 10, "\n")
 
     print(f"Вы можете произвести с выгруженными данными сортировку всех вакансий по зарплате (для этого введите 1) "
@@ -88,17 +84,11 @@ def starter():
             order = orders[order.replace(" ", "")]
 
         outfile_hh_sort = f"HH-sort-in-{order}-vacancies.csv"
-        with open(outfile_hh_sort, "w", encoding="utf-8") as f:
-            for i in sorting(Vacancy.hh_vacancies, order):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(sorting(Vacancy.hh_vacancies, order), outfile_hh_sort)
         print("\n", "*" * 10, f"Отсортированные вакансии в файле HH-sort-in-{order}-vacancies.csv", "*" * 10, "\n")
 
         outfile_sj_sort = f"SJ-sort-in-{order}-vacancies.csv"
-        with open(outfile_sj_sort, "w", encoding="utf-8") as f:
-            for i in sorting(Vacancy.sj_vacancies, order):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(sorting(Vacancy.sj_vacancies, order), outfile_sj_sort)
         print("\n", "*" * 10, f"Отсортированные вакансии в файле SJ-sort-in-{order}-vacancies.csv", "*" * 10, "\n")
 
 
@@ -110,17 +100,11 @@ def starter():
             top_count = int(top_count.replace(" ", ""))
 
         outfile_hh_top = f"HH-TOP-{top_count}-vacancies.csv"
-        with open(outfile_hh_top, "w", encoding="utf-8") as f:
-            for i in get_top(Vacancy.hh_vacancies, top_count, orders["1"]):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(get_top(Vacancy.hh_vacancies, top_count, orders["1"]), outfile_hh_top)
         print("\n", "*" * 10, f"ТОП-{top_count} вакансий загружены в файл {outfile_hh_top}", "*" * 10, "\n")
 
         outfile_sj_top = f"SJ-TOP-{top_count}-vacancies.csv"
-        with open(outfile_sj_top, "w", encoding="utf-8") as f:
-            for i in get_top(Vacancy.sj_vacancies, top_count, orders["1"]):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(get_top(Vacancy.sj_vacancies, top_count, orders["1"]), outfile_sj_top)
         print("\n", "*" * 10, f"ТОП-{top_count} вакансий загружены в файл {outfile_sj_top}", "*" * 10, "\n")
 
 
@@ -145,18 +129,12 @@ def starter():
 
         outfile_hh_select = f"HH-select-vacancies-for-{id_sel_exper}.csv"
         print("\n", "*" * 10, f"Отбор данных в файл {outfile_hh_select}", "*" * 10, "\n")
-        with open(outfile_hh_select, "w", encoding="utf-8") as f:
-            for i in Connector.all_connectors[hh.filename].select(query_sel):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(Connector.all_connectors[hh.filename].select(query_sel), outfile_hh_select)
         print("\n", "*" * 10, f"Селективные данные в файле {outfile_hh_select}", "*" * 10, "\n")
 
         outfile_sj_select = f"SJ-select-vacancies-for-{id_sel_exper}.csv"
         print("\n", "*" * 10, f"Отбор данных в файл {outfile_sj_select}", "*" * 10, "\n")
-        with open(outfile_sj_select, "w", encoding="utf-8") as f:
-            for i in Connector.all_connectors[sj.filename].select(query_sel):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(Connector.all_connectors[sj.filename].select(query_sel), outfile_sj_select)
         print("\n", "*" * 10, f"Селективные данные в файле {outfile_sj_select}", "*" * 10, "\n")
 
     elif additionals == "4":
@@ -179,25 +157,18 @@ def starter():
 
         outfile_hh_del = f"HH-delete-vacancies-for-{id_del_exper}.csv"
         print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_hh_del}", "*" * 10, "\n")
-        with open(outfile_hh_del, "w", encoding="utf-8") as f:
-            for i in Connector.all_connectors[hh.filename].delete(query_del):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(Connector.all_connectors[hh.filename].delete(query_del), outfile_hh_del)
         print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_hh_del}", "*" * 10, "\n")
 
         outfile_sj_del = f"SJ-delete_vacancies-for-{id_del_exper}.csv"
         print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_sj_del}", "*" * 10, "\n")
-        with open(outfile_sj_del, "w", encoding="utf-8") as f:
-            for i in Connector.all_connectors[sj.filename].delete(query_del):
-                file_writer = csv.writer(f)
-                file_writer.writerow([str(i)])
+        write_vac_to_outfile(Connector.all_connectors[sj.filename].delete(query_del), outfile_sj_del)
         print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_sj_del}", "*" * 10, "\n")
 
     del_temp_json(hh.filename)
     del_temp_json(sj.filename)
 
     return True
-
 
 if __name__ == "__main__":
     starter()
