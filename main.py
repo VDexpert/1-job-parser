@@ -9,16 +9,16 @@ def starter():
     if key_word == "":
         key_word = "python"
 
-    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [1000]: ")
+    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: ")
     if quantity_vac == "":
-        quantity_vac = 1000
+        quantity_vac = 120
 
     hh = HH(quantity_vac, key_word)
     sj = SuperJob(quantity_vac, key_word)
     range_hh = quantity_vac // hh.per_page + 2
     range_sj = quantity_vac // sj.per_page + 2
 
-    print("\n", "*"*10, "Извлечение данных с сайта hh.ru", "*"*10, "\n")
+    print("\n", "*"*10, "Парсинг данных с сайта hh.ru", "*"*10, "\n")
     for i in range(1, range_hh):
         hh.get_request(i)
 
@@ -27,20 +27,20 @@ def starter():
     print("\n", "*" * 10, "Форматирование данных с сайта hh.ru", "*" * 10, "\n")
     for i in data_hh:
         count_hh += 1
-        HHVacancy(i["name"], i["href"], i["company"], i["salary"], i["description"],
-                  hh.filename)
+        HHVacancy(name=i["name"], href=i["href"], company=i["company"], experience=i["experience"],
+                  salary=i["salary"], description=i["description"], filename=hh.filename)
         if count_hh == quantity_vac:
             break
 
     outfile_hh = f"HH-vacancies-{hh.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_hh}", "*" * 10, "\n")
-    with open(outfile_hh, "w") as f:
+    with open(outfile_hh, "w", encoding="utf-8") as f:
         for i in Vacancy.hh_vacancies:
             file_writer = csv.writer(f)
             file_writer.writerow([str(i)])
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_hh}", "*" * 10, "\n")
 
-    print("\n", "*" * 10, "Извлечение данных с сайта superjob.ru", "*" * 10, "\n")
+    print("\n", "*" * 10, "Парсинг данных с сайта superjob.ru", "*" * 10, "\n")
     for i in range(1, range_sj):
         sj.get_request(i)
 
@@ -49,25 +49,27 @@ def starter():
     print("\n", "*" * 10, "Форматирование данных с сайта superjob.ru", "*" * 10, "\n")
     for i in  data_sj:
         count_sj += 1
-        SJVacancy(i["name"], i["href"], i["company"], i["salary"], i["description"],
-                  sj.filename)
+        SJVacancy(name=i["name"], href=i["href"], company=i["company"], experience=i["experience"],
+                  salary=i["salary"], description=i["description"], filename=sj.filename)
         if count_sj == quantity_vac:
             break
 
     outfile_sj = f"SJ-vacancies-{sj.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_sj}", "*" * 10, "\n")
-    with open(outfile_sj, "w") as f:
+    with open(outfile_sj, "w", encoding="utf-8") as f:
         for i in Vacancy.sj_vacancies:
             file_writer = csv.writer(f)
             file_writer.writerow([str(i)])
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_sj}", "*" * 10, "\n")
 
-    print(f"Вы можете произвести с выгруженными данными сортировку \n"
-          f"всех вакансий по уровню зарплаты (для этого введите 1) или выгрузить \n"
-          f"ТОП-количество самых высокооплачиваемых вакансий (для этого введите 2) \n"
+    print(f"Вы можете произвести с выгруженными данными сортировку всех вакансий по зарплате (для этого введите 1) "
+          f"или выгрузить ТОП-количество самых высокооплачиваемых вакансий (для этого введите 2) \n"
+          f"или отобрать из файла только вакансии с определенным опытом работы (для этого введите 3) \n"
+          f"или удалить из файла только вакансии с определенным опытом работы (для этого введите 4)"
           f"Для выхода из программы наберите stop \n")
 
-    additionals = input("Сортировка (1) или ТОП-вакансий (2)? Введите 1 или 2 [1]: ")
+    additionals = input("Сортировка (1) / ТОП-вакансий (2) / отбор по опыту (3) / удаление по опыту (4) "
+                        "Введите 1, 2, 3 или 4 [1]: ")
     orders = {"1": "desc", "2": "asc"}
 
     if additionals == "":
@@ -75,7 +77,7 @@ def starter():
     else:
         additionals = additionals.replace(" ", "")
 
-    if additionals.lower().replace(" ", "") == "stop":
+    if additionals.lower() == "stop":
         return f"Программа завершена"
 
     if additionals == "1":
@@ -86,18 +88,19 @@ def starter():
             order = orders[order.replace(" ", "")]
 
         outfile_hh_sort = f"HH-sort-in-{order}-vacancies.csv"
-        with open(outfile_hh_sort, "w") as f:
+        with open(outfile_hh_sort, "w", encoding="utf-8") as f:
             for i in sorting(Vacancy.hh_vacancies, order):
                 file_writer = csv.writer(f)
                 file_writer.writerow([str(i)])
         print("\n", "*" * 10, f"Отсортированные вакансии в файле HH-sort-in-{order}-vacancies.csv", "*" * 10, "\n")
 
         outfile_sj_sort = f"SJ-sort-in-{order}-vacancies.csv"
-        with open(outfile_sj_sort, "w") as f:
+        with open(outfile_sj_sort, "w", encoding="utf-8") as f:
             for i in sorting(Vacancy.sj_vacancies, order):
                 file_writer = csv.writer(f)
                 file_writer.writerow([str(i)])
         print("\n", "*" * 10, f"Отсортированные вакансии в файле SJ-sort-in-{order}-vacancies.csv", "*" * 10, "\n")
+
 
     elif additionals == "2":
         top_count = input("Введите количество ТОП-вакансий, которые нужно вывести [30]: ")
@@ -107,21 +110,91 @@ def starter():
             top_count = int(top_count.replace(" ", ""))
 
         outfile_hh_top = f"HH-TOP-{top_count}-vacancies.csv"
-        with open(outfile_hh_top, "w") as f:
+        with open(outfile_hh_top, "w", encoding="utf-8") as f:
             for i in get_top(Vacancy.hh_vacancies, top_count, orders["1"]):
                 file_writer = csv.writer(f)
                 file_writer.writerow([str(i)])
         print("\n", "*" * 10, f"ТОП-{top_count} вакансий загружены в файл {outfile_hh_top}", "*" * 10, "\n")
 
         outfile_sj_top = f"SJ-TOP-{top_count}-vacancies.csv"
-        with open(outfile_sj_top, "w") as f:
+        with open(outfile_sj_top, "w", encoding="utf-8") as f:
             for i in get_top(Vacancy.sj_vacancies, top_count, orders["1"]):
                 file_writer = csv.writer(f)
                 file_writer.writerow([str(i)])
         print("\n", "*" * 10, f"ТОП-{top_count} вакансий загружены в файл {outfile_sj_top}", "*" * 10, "\n")
 
-    # del_temp_json(hh.filename)
-    # del_temp_json(sj.filename)
+
+    elif additionals == "3":
+
+        sel_exper = input (f"ОТБОР ВАКАНСИЙ ПО ОПЫТУ РАБОТЫ \n"
+                           f"Значения поля опыта: 1 = 'Нет опыта', 2 = 'от 1 года до 3 лет', 3 = 'от 3 до 6 лет', 4 = 'более 6 лет' \n"
+                           f"Введите значение опыта 1, 2, 3 или 4, по которым нужно отфильтровать вакансии [1: 'Нет опыта']: ")
+
+        contain_sel_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
+
+        if sel_exper == "":
+            sel_exper = "Нет опыта"
+        else:
+            sel_exper = contain_sel_exper[sel_exper]
+
+        contain_id_exper = {"Нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
+                            "от 3 до 6 лет": "between3And6", "более 6 лет": "moreThan6"}
+        id_sel_exper = contain_id_exper[sel_exper]
+
+        query_sel = {"experience": sel_exper}
+
+        outfile_hh_select = f"HH-select-vacancies-for-{id_sel_exper}.csv"
+        print("\n", "*" * 10, f"Отбор данных в файл {outfile_hh_select}", "*" * 10, "\n")
+        with open(outfile_hh_select, "w", encoding="utf-8") as f:
+            for i in Connector.all_connectors[hh.filename].select(query_sel):
+                file_writer = csv.writer(f)
+                file_writer.writerow([str(i)])
+        print("\n", "*" * 10, f"Селективные данные в файле {outfile_hh_select}", "*" * 10, "\n")
+
+        outfile_sj_select = f"SJ-select-vacancies-for-{id_sel_exper}.csv"
+        print("\n", "*" * 10, f"Отбор данных в файл {outfile_sj_select}", "*" * 10, "\n")
+        with open(outfile_sj_select, "w", encoding="utf-8") as f:
+            for i in Connector.all_connectors[sj.filename].select(query_sel):
+                file_writer = csv.writer(f)
+                file_writer.writerow([str(i)])
+        print("\n", "*" * 10, f"Селективные данные в файле {outfile_sj_select}", "*" * 10, "\n")
+
+    elif additionals == "4":
+
+        del_exper = input(f"УДАЛЕНИЕ ВАКАНСИЙ ПО ОПЫТУ РАБОТЫ \n"
+            f"Значения поля опыта: 1 = 'Нет опыта', 2 = 'от 1 года до 3 лет', 3 = 'от 3 до 6 лет', 4 = 'более 6 лет' \n"
+            f"Введите значение опыта 1, 2, 3 или 4, по которым нужно удалять вакансии [1: 'Нет опыта']: ")
+
+        contain_del_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
+        if del_exper == "":
+            del_exper = "Нет опыта"
+        else:
+            del_exper = contain_del_exper[del_exper]
+
+        contain_id_exper = {"Нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
+                            "от 3 до 6 лет": "between3And6", "более 6 лет": "moreThan6"}
+        id_del_exper = contain_id_exper[del_exper]
+
+        query_del = {"experience": del_exper}
+
+        outfile_hh_del = f"HH-delete-vacancies-for-{id_del_exper}.csv"
+        print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_hh_del}", "*" * 10, "\n")
+        with open(outfile_hh_del, "w", encoding="utf-8") as f:
+            for i in Connector.all_connectors[hh.filename].delete(query_del):
+                file_writer = csv.writer(f)
+                file_writer.writerow([str(i)])
+        print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_hh_del}", "*" * 10, "\n")
+
+        outfile_sj_del = f"SJ-delete_vacancies-for-{id_del_exper}.csv"
+        print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_sj_del}", "*" * 10, "\n")
+        with open(outfile_sj_del, "w", encoding="utf-8") as f:
+            for i in Connector.all_connectors[sj.filename].delete(query_del):
+                file_writer = csv.writer(f)
+                file_writer.writerow([str(i)])
+        print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_sj_del}", "*" * 10, "\n")
+
+    del_temp_json(hh.filename)
+    del_temp_json(sj.filename)
 
     return True
 

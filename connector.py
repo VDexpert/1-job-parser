@@ -92,8 +92,7 @@ class Connector:
                         continue
                     else:
                         res_data.append(i)
-                with open(self.__data_file, "w") as outfile:
-                    json.dump(res_data, outfile, indent=2)
+                return res_data
 
 if __name__ == "__main__":
     df = Connector('df.json')
