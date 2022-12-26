@@ -70,20 +70,20 @@ class HH(Engine):
         orig_data = r.json()["items"]
         res_data = []
 
-        for vac in orig_data:
-            id_vac = vac["id"]
-            name = vac["name"]
-            href = vac["alternate_url"]
-            company = vac["employer"]["name"]
+        for i in orig_data:
+            id = i["id"]
+            name = i["name"]
+            href = i["alternate_url"]
+            company = i["employer"]["name"]
 
-            vac = rq.get(self.__url + "/" + id_vac)
+            vac = rq.get(self.__url + "/" + id)
             experience = vac.json()["experience"]["name"].lower()
 
-            description = vac["snippet"]["responsibility"]
+            description = i["snippet"]["responsibility"]
             salary = "По договорённости"
             rate_salary = 1
-            if vac["salary"]:
-                cur_code = vac["salary"]["currency"]
+            if i["salary"]:
+                cur_code = i["salary"]["currency"]
 
                 if cur_code != "RUR":
                     rate = rq.get("https://api.hh.ru/dictionaries")
@@ -93,14 +93,14 @@ class HH(Engine):
                         if cur["code"] == cur_code:
                             rate_salary = cur["rate"]
 
-            if vac["salary"]:
-                if vac["salary"]["from"] and vac["salary"]["to"]:
-                    salary = str(round(vac["salary"]["from"] / rate_salary)) + \
-                             "\u2014" + str(round(vac["salary"]["to"] / rate_salary))
-                elif vac["salary"]["from"] and not vac["salary"]["to"]:
-                    salary = "от" + str(round(vac["salary"]["from"] / rate_salary))
-                elif not vac["salary"]["from"] and vac["salary"]["to"]:
-                    salary = "до" + str(round(vac["salary"]["to"] / rate_salary))
+            if i["salary"]:
+                if i["salary"]["from"] and i["salary"]["to"]:
+                    salary = str(round(i["salary"]["from"] / rate_salary)) + \
+                             "\u2014" + str(round(i["salary"]["to"] / rate_salary))
+                elif i["salary"]["from"] and not i["salary"]["to"]:
+                    salary = "от" + str(round(i["salary"]["from"] / rate_salary))
+                elif not i["salary"]["from"] and i["salary"]["to"]:
+                    salary = "до" + str(round(i["salary"]["to"] / rate_salary))
 
             res_data.append(
                 {"name": name, "href": href, "experience": experience, "company": company, "salary": salary,
@@ -133,14 +133,14 @@ class SuperJob(Engine):
         }
         if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
-            html_vacancies = soup.find_all("div", class_="f-test-search-result-item")
+            items = soup.find_all("div", class_="f-test-search-result-item")
             prev_vac = []
 
-            for vac in html_vacancies:
+            for item in items:
                 try:
-                    name = vac.find("span", class_="_2s70W").find("a", class_="_1IHWd").get_text()
-                    href = "https://russia.superjob.ru" + vac.find("a", class_="_1IHWd").get("href")
-                    company = vac.find("span", class_="_3nMqD").find("a", class_="_1IHWd").get_text()
+                    name = item.find("span", class_="_2s70W").find("a", class_="_1IHWd").get_text()
+                    href = "https://russia.superjob.ru" + item.find("a", class_="_1IHWd").get("href")
+                    company = item.find("span", class_="_3nMqD").find("a", class_="_1IHWd").get_text()
 
                     html = urlopen(href).read()
                     soup = BeautifulSoup(html, features="html.parser")
@@ -159,11 +159,11 @@ class SuperJob(Engine):
                             experience = container_exper[i]
                             break
 
-                    salary = " ".join(vac.find("span", "_2eYAG _1B2ot _3EXZS _3pAka _3GChV").get_text().split("\xa0"))
+                    salary = " ".join(item.find("span", "_2eYAG _1B2ot _3EXZS _3pAka _3GChV").get_text().split("\xa0"))
                     if salary != "По договорённости":
                         salary = salary[0:-2]
                         salary = salary.replace(" ", "")
-                    description = vac.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
+                    description = item.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
 
                     prev_vac.append(
                         {"name": name, "href": href, "company": company, "experience": experience,
