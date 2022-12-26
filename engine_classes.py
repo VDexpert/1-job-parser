@@ -76,8 +76,8 @@ class HH(Engine):
             href = vac["alternate_url"]
             company = vac["employer"]["name"]
 
-            vac = rq.get(self.__url + "/" + id_vac)
-            experience = vac.json()["experience"]["name"].lower()
+            req_vac = rq.get(self.__url + "/" + id_vac)
+            experience = req_vac.json()["experience"]["name"].lower()
 
             description = vac["snippet"]["responsibility"]
             salary = "По договорённости"

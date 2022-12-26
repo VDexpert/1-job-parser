@@ -116,11 +116,11 @@ def starter():
         contain_sel_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
 
         if sel_exper == "":
-            sel_exper = "Нет опыта"
+            sel_exper = "нет опыта"
         else:
             sel_exper = contain_sel_exper[sel_exper]
 
-        contain_id_exper = {"Нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
+        contain_id_exper = {"нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
                             "от 3 до 6 лет": "between3And6", "более 6 лет": "moreThan6"}
         id_sel_exper = contain_id_exper[sel_exper]
 
