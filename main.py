@@ -10,7 +10,7 @@ def starter():
     if key_word == "":
         key_word = "python"
 
-    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: ")
+    quantity_vac = int(input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: "))
     if quantity_vac == "":
         quantity_vac = 120
 
