@@ -1,7 +1,6 @@
 
 from engine_classes import*
 from jobs_classes import*
-import csv
 from del_temp_file import*
 from write_to_outfile import write_vac_to_outfile
 
