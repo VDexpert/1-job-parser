@@ -2,7 +2,7 @@ from connector import Connector
 
 class Vacancy:
     __slots__ = ("name", "href", "company", "experience", "salary", "description",
-                 "salary_for_comparison", "__filename", "count", "step_iter", "stop", "value")
+                 "salary_for_comparison", "__filename", "count")
     hh_vacancies = []
     sj_vacancies = []
 
@@ -23,8 +23,6 @@ class Vacancy:
         elif self.__class__.__name__ == "SJVacancy":
             self.sj_vacancies.append(self)
             self.count = len(self.sj_vacancies)
-        self.step_iter = 1
-
 
     def __gt__(self, other):
         return self.salary_for_comparison > other.salary_for_comparison

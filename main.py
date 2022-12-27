@@ -1,4 +1,3 @@
-
 from engine_classes import*
 from jobs_classes import*
 from del_temp_file import*
@@ -10,9 +9,11 @@ def starter():
     if key_word == "":
         key_word = "python"
 
-    quantity_vac = int(input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: "))
+    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: ")
     if quantity_vac == "":
         quantity_vac = 120
+    else:
+        quantity_vac = int(quantity_vac)
 
     hh = HH(quantity_vac, key_word)
     sj = SuperJob(quantity_vac, key_word)
@@ -109,16 +110,16 @@ def starter():
 
     elif additionals == "3":
 
-        sel_exper = input (f"ОТБОР ВАКАНСИЙ ПО ОПЫТУ РАБОТЫ \n"
+        sel_exper = input(f"ОТБОР ВАКАНСИЙ ПО ОПЫТУ РАБОТЫ \n"
                            f"Значения поля опыта: 1 = 'Нет опыта', 2 = 'от 1 года до 3 лет', 3 = 'от 3 до 6 лет', 4 = 'более 6 лет' \n"
                            f"Введите значение опыта 1, 2, 3 или 4, по которым нужно отфильтровать вакансии [1: 'Нет опыта']: ")
 
         contain_sel_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
 
-        if sel_exper == "":
+        if sel_exper.replace(" ", "") == "":
             sel_exper = "нет опыта"
         else:
-            sel_exper = contain_sel_exper[sel_exper]
+            sel_exper = contain_sel_exper[sel_exper.replace(" ", "")]
 
         contain_id_exper = {"нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
                             "от 3 до 6 лет": "between3And6", "более 6 лет": "moreThan6"}
@@ -143,10 +144,10 @@ def starter():
             f"Введите значение опыта 1, 2, 3 или 4, по которым нужно удалять вакансии [1: 'Нет опыта']: ")
 
         contain_del_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
-        if del_exper == "":
+        if del_exper.replace(" ", "") == "":
             del_exper = "Нет опыта"
         else:
-            del_exper = contain_del_exper[del_exper]
+            del_exper = contain_del_exper[del_exper.replace(" ", "")]
 
         contain_id_exper = {"Нет опыта": "noExperience", "от 1 года до 3 лет": "between1And3",
                             "от 3 до 6 лет": "between3And6", "более 6 лет": "moreThan6"}
