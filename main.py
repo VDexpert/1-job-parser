@@ -9,9 +9,11 @@ def starter():
     if key_word == "":
         key_word = "python"
 
-    quantity_vac = int(input("Введите количество вакансий, которое надо найти на каждом сервисе [1000]: "))
+    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [1000]: ")
     if quantity_vac == "":
         quantity_vac = 1000
+    else:
+        quantity_vac = int(quantity_vac)
 
     hh = HH(quantity_vac, key_word)
     sj = SuperJob(quantity_vac, key_word)
