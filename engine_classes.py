@@ -166,12 +166,8 @@ class SuperJob(Engine):
             if self.count == self.quantity:
                 break
 
-
-            for i in res_data:
-                print(i)
-
             self.get_connector(self.filename)
-            Connector.all_connectors[self.filename].insert(prev_vac)
+            Connector.all_connectors[self.filename].insert(res_data)
 
 
 if __name__ == "__main__":
