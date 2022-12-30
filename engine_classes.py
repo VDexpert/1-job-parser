@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 import requests as rq
 from connector import Connector
-from bs4 import BeautifulSoup
-from urllib.request import urlopen
-import re
+import json
 
 class Engine(ABC):
     all_engines = {}
@@ -63,14 +61,14 @@ class HH(Engine):
 
     def get_request(self, page):
         self.__params = {"text": self.key_word, "page": page, "per_page": self.__per_page}
-        r = rq.get(self.__url, self.__params)
-        if r.status_code != 200:
-            raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {r.status_code}")
+        response = rq.get(self.__url, self.__params)
+        if response.status_code != 200:
+            raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {response.status_code}")
 
-        orig_data = r.json()["items"]
+        origin_data = response.json()["items"]
         res_data = []
 
-        for vac in orig_data:
+        for vac in origin_data:
             id_vac = vac["id"]
             name = vac["name"]
             href = vac["alternate_url"]
@@ -88,7 +86,7 @@ class HH(Engine):
                 if cur_code != "RUR":
                     rate = rq.get("https://api.hh.ru/dictionaries")
                     if rate.status_code != 200:
-                        raise Exception(f"Ошибка запроса значений валют в объекте класса {self.__class__.__name__}: {r.status_code}")
+                        raise Exception(f"Ошибка запроса значений валют в объекте класса {self.__class__.__name__}: {response.status_code}")
                     for cur in rate.json()["currency"]:
                         if cur["code"] == cur_code:
                             rate_salary = cur["rate"]
@@ -114,77 +112,71 @@ class HH(Engine):
 
 
 class SuperJob(Engine):
-    __url = f"https://russia.superjob.ru/vacancy/search/?keywords="
-    __per_page = 37
+    __url = f"https://api.superjob.ru/2.0/vacancies/"
+    __per_page = 100
 
     @property
     def per_page(self):
         return self.__per_page
 
     def get_request(self, page):
-        url = f"{self.__url}{self.key_word}&page={page}"
-        r = rq.get(url)
+        self.__params = {"keyword": self.key_word, "page": page, "count": self.__per_page, "order_field": "payment", "order_direction": "desc"}
+        self.__secret_key = {"X-Api-App-Id": "v3.r.137228722.e8991bb405e73fc133aa1aa5927d54b3d5e55fc3.e6686c61c5b8bdf5acab068a86154863b5a2d1f1"}
+
+        response = rq.get(self.__url, params=self.__params, headers=self.__secret_key)
+
+        if response.status_code != 200:
+            raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {response.status_code}")
+
         container_exper = {
-            "Опыт работы от 3 лет": "от 3 до 6 лет",
-            "Опыт работы от 1 года": "от 1 года до 3 лет",
-            "Опыт работы не требуется": "нет опыта",
-            "Опыт не нужен": "нет опыта",
-            "Опыт работы от 6 лет": "более 6 лет"
+            3: "от 3 до 6 лет",
+            2: "от 1 года до 3 лет",
+            0: "не указано",
+            1: "не требуется",
+            4: "более 6 лет"
         }
-        if r.status_code == 200:
-            soup = BeautifulSoup(r.text, "html.parser")
-            html_vacancies = soup.find_all("div", class_="f-test-search-result-item")
-            prev_vac = []
+        res_data = []
+        origin_data = response.json()["objects"]
 
-            for vac in html_vacancies:
-                try:
-                    name = vac.find("span", class_="_2s70W").find("a", class_="_1IHWd").get_text()
-                    href = "https://russia.superjob.ru" + vac.find("a", class_="_1IHWd").get("href")
-                    company = vac.find("span", class_="_3nMqD").find("a", class_="_1IHWd").get_text()
+        for vac in origin_data:
+            name = vac["profession"]
+            href = vac["link"]
+            company = vac["firm_name"]
+            experience = vac["experience"]["id"]
+            if vac["work"]:
+                description = vac["work"]
+            elif vac["vacancyRichText"]:
+                description = vac["vacancyRichText"]
+            try:
+                if vac["payment"]:
+                    salary = str(vac["payment"])
+            except KeyError:
+                if vac["payment_from"] and vac["payment_to"]:
+                    salary = str(vac["payment_from"]) + "\u2014" + str(vac["payment_to"])
+                elif vac["payment_from"]:
+                    salary = "от " + str(vac["payment_from"])
+                elif vac["payment_to"]:
+                    salary = "до " + str(vac["payment_to"])
 
-                    html = urlopen(href).read()
-                    soup = BeautifulSoup(html, features="html.parser")
+            res_data.append(
+                {"name": name, "href": href, "company": company, "experience": container_exper[experience],
+                 "salary": salary, "description": description})
 
-                    for script in soup(["script", "style"]):
-                        script.extract()
+            self.count += 1
+            if self.count == self.quantity:
+                break
 
-                    text = soup.get_text()
-                    lines = (line.strip() for line in text.splitlines())
-                    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-                    text = '\n'.join(chunk for chunk in chunks if chunk)
 
-                    for i in container_exper:
-                        match = re.findall(i, text)
-                        if match:
-                            experience = container_exper[i]
-                            break
-
-                    salary = " ".join(vac.find("span", "_2eYAG _1B2ot _3EXZS _3pAka _3GChV").get_text().split("\xa0"))
-                    if salary != "По договорённости":
-                        salary = salary[0:-2]
-                        salary = salary.replace(" ", "")
-                    description = vac.find("span", class_="_1G5lt _3EXZS _3pAka _3GChV _2GgYH").get_text()
-
-                    prev_vac.append(
-                        {"name": name, "href": href, "company": company, "experience": experience,
-                         "salary": salary, "description": description})
-
-                    self.count += 1
-                    if self.count == self.quantity:
-                        break
-
-                except Exception:
-                    continue
+            for i in res_data:
+                print(i)
 
             self.get_connector(self.filename)
             Connector.all_connectors[self.filename].insert(prev_vac)
-        else:
-            raise Exception(f"Ошибка запроса объекта класса {self.__class__.__name__}: {r.status_code}")
 
 
 if __name__ == "__main__":
     hh1 = HH(100, "python")
     hh1.get_request(1)
 
-    sj1 = SuperJob(80, "python")
-    sj1.get_request(1)
+    sj1 = SuperJob(100, "python")
+    sj1.get_request(5)
