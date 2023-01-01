@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import requests as rq
 from connector import Connector
-import json
 
 class Engine(ABC):
     all_engines = {}
@@ -132,7 +131,7 @@ class SuperJob(Engine):
             3: "от 3 до 6 лет",
             2: "от 1 года до 3 лет",
             0: "не указано",
-            1: "не требуется",
+            1: "нет опыта",
             4: "более 6 лет"
         }
         res_data = []
@@ -166,9 +165,8 @@ class SuperJob(Engine):
             if self.count == self.quantity:
                 break
 
-            self.get_connector(self.filename)
-            Connector.all_connectors[self.filename].insert(res_data)
-
+        self.get_connector(self.filename)
+        Connector.all_connectors[self.filename].insert(res_data)
 
 if __name__ == "__main__":
     hh1 = HH(100, "python")

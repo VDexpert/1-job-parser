@@ -2,6 +2,8 @@ from engine_classes import*
 from jobs_classes import*
 from del_temp_file import*
 from write_to_outfile import write_vac_to_outfile
+import time
+import math
 
 def starter():
     key_word = input("Введите ключевое слово, по которому будем искать вакансии [python]: ")
@@ -9,20 +11,22 @@ def starter():
     if key_word == "":
         key_word = "python"
 
-    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [120]: ")
+    quantity_vac = input("Введите количество вакансий, которое надо найти на каждом сервисе [100]: ")
     if quantity_vac == "":
-        quantity_vac = 120
+        quantity_vac = 100
     else:
         quantity_vac = int(quantity_vac)
 
     hh = HH(quantity_vac, key_word)
     sj = SuperJob(quantity_vac, key_word)
-    range_hh = quantity_vac // hh.per_page + 2
-    range_sj = quantity_vac // sj.per_page + 2
+    range_hh = quantity_vac // hh.per_page + 1
+    range_sj = quantity_vac // sj.per_page + 1
 
     print("\n", "*"*10, "Парсинг данных с сайта hh.ru", "*"*10, "\n")
+    start = time.perf_counter()
     for page in range(1, range_hh):
         hh.get_request(page)
+    print(f"Время парсинга {(time.perf_counter() - start) // 60} минут {round((time.perf_counter() - start) % 60)} секунд")
 
     data_hh = Connector.all_connectors[hh.filename].connect()
     count_hh = 0
@@ -35,13 +39,18 @@ def starter():
             break
 
     outfile_hh = f"HH-vacancies-{hh.key_word}.csv"
+    start = time.perf_counter()
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_hh}", "*" * 10, "\n")
     write_vac_to_outfile(Vacancy.hh_vacancies, outfile_hh)
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_hh}", "*" * 10, "\n")
+    print(f"Время загрузки {(time.perf_counter() - start) // 60} минут {round((time.perf_counter() - start) % 60)} секунд")
 
+
+    start = time.perf_counter()
     print("\n", "*" * 10, "Парсинг данных с сайта superjob.ru", "*" * 10, "\n")
     for page in range(1, range_sj):
         sj.get_request(page)
+    print(f"Время парсинга {(time.perf_counter() - start) // 60} минут {round((time.perf_counter() - start) % 60)} секунд")
 
     data_sj = Connector.all_connectors[sj.filename].connect()
     count_sj = 0
@@ -53,10 +62,12 @@ def starter():
         if count_sj == quantity_vac:
             break
 
+    start = time.perf_counter()
     outfile_sj = f"SJ-vacancies-{sj.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_sj}", "*" * 10, "\n")
     write_vac_to_outfile(Vacancy.sj_vacancies, outfile_sj)
     print("\n", "*" * 10, f"Данные загружены в файл {outfile_sj}", "*" * 10, "\n")
+    print(f"Время загрузки {(time.perf_counter() - start) // 60} минут {round((time.perf_counter() - start) % 60)} секунд \n")
 
     print(f"Вы можете произвести с выгруженными данными сортировку всех вакансий по зарплате (для этого введите 1) "
           f"или выгрузить ТОП-количество самых высокооплачиваемых вакансий (для этого введите 2) \n"
@@ -114,7 +125,7 @@ def starter():
                            f"Значения поля опыта: 1 = 'Нет опыта', 2 = 'от 1 года до 3 лет', 3 = 'от 3 до 6 лет', 4 = 'более 6 лет' \n"
                            f"Введите значение опыта 1, 2, 3 или 4, по которым нужно отфильтровать вакансии [1: 'Нет опыта']: ")
 
-        contain_sel_exper = {"1": "Нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
+        contain_sel_exper = {"1": "нет опыта", "2": "от 1 года до 3 лет", "3": "от 3 до 6 лет", "4": "более 6 лет"}
 
         if sel_exper.replace(" ", "") == "":
             sel_exper = "нет опыта"
