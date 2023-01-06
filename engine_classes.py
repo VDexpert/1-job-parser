@@ -9,7 +9,7 @@ class Engine(ABC):
         self.__quantity = quantity
         self.__count = 0
         self.__key_word = key_word
-        self.__filename = f"JSON-{self.__class__.__name__}-dump-{self.key_word}"
+        self.__filename = f"JSON-{self.__class__.__name__}-dump-{self.key_word}.json"
         self.all_engines[self.__filename] = self
 
 

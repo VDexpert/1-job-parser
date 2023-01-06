@@ -3,8 +3,6 @@ from connector import Connector
 class Vacancy:
     __slots__ = ("name", "href", "company", "experience", "salary", "description",
                  "salary_for_comparison", "__filename", "count")
-    hh_vacancies = []
-    sj_vacancies = []
 
     def __init__(self, name, href, company, experience, salary, description, filename):
         self.name = name
@@ -32,10 +30,10 @@ class Vacancy:
 
     def __str__(self):
         if self.salary == "По договорённости":
-            return f'{self.__class__.__name__}(№ {self.count} из {self.get_count_of_vacancy(self.filename)}): {self.company}, ' \
+            return f'{self.__class__.__name__} № {self.count}: {self.company}, ' \
                    f'опыт: {self.experience}, зарплата: {self.salary}, ссылка: {self.href}'
         else:
-            return f'{self.__class__.__name__}(№ {self.count} из {self.get_count_of_vacancy(self.filename)}): {self.company}, ' \
+            return f'{self.__class__.__name__} № {self.count}: {self.company}, ' \
                    f'опыт: {self.experience}, зарплата: {self.salary} руб/мес, ссылка: {self.href}'
 
     @staticmethod
@@ -59,7 +57,8 @@ class Vacancy:
 
 class CountMixin:
 
-    def get_count_of_vacancy(self, filename):
+    @classmethod
+    def get_count_of_vacancy(cls, filename):
         """
         Вернуть количество вакансий от текущего сервиса.
         Получать количество необходимо динамически из файла.
@@ -80,6 +79,7 @@ class HHVacancy(Vacancy, CountMixin):
 class SJVacancy(Vacancy, CountMixin):
     """ SuperJob Vacancy """
     pass
+
 
 
 def sorting(vacancies, order):
