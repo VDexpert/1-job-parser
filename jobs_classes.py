@@ -2,7 +2,7 @@ from connector import Connector
 
 class Vacancy:
     __slots__ = ("name", "href", "company", "experience", "salary", "description",
-                 "salary_for_comparison", "__filename", "count")
+                 "salary_for_comparison", "__filename", "id")
 
     def __init__(self, name, href, company, experience, salary, description, filename, count_vac):
         self.name = name
@@ -15,7 +15,7 @@ class Vacancy:
             self.salary = salary[0:2] + " " + salary[2:]
         self.description = description
         self.__filename = filename
-        self.count = count_vac
+        self.id = count_vac
 
     def __gt__(self, other):
         return self.salary_for_comparison > other.salary_for_comparison
@@ -25,10 +25,10 @@ class Vacancy:
 
     def __str__(self):
         if self.salary == "По договорённости":
-            return f'{self.__class__.__name__} № {self.count}: {self.company}, ' \
+            return f'{self.__class__.__name__} № {self.id}: {self.company}, ' \
                    f'опыт: {self.experience}, зарплата: {self.salary}, ссылка: {self.href}'
         else:
-            return f'{self.__class__.__name__} № {self.count}: {self.company}, ' \
+            return f'{self.__class__.__name__} № {self.id}: {self.company}, ' \
                    f'опыт: {self.experience}, зарплата: {self.salary} руб/мес, ссылка: {self.href}'
 
     @staticmethod
