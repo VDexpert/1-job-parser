@@ -172,8 +172,8 @@ def starter():
         write_vac_to_outfile(stack_sj_without_deleting.to_list(), outfile_sj_del, SJVacancy.get_count_of_vacancy(sj_engine.filename_json))
         print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_sj_del}", "*" * 10, "\n")
 
-    # del_temp_json(hh_engine.filename_json)
-    # del_temp_json(sj_engine.filename_json)
+    del_temp_json(hh_engine.filename_json)
+    del_temp_json(sj_engine.filename_json)
 
     return True
 
