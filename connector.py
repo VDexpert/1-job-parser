@@ -52,6 +52,10 @@ class Connector:
             with open(self.__data_file, "w") as outfile:
                 json.dump(source_data, outfile, indent=2)
 
+    def replace(self, data):
+        with open(self.__data_file, "w") as f:
+            json.dump(data, f, indent=2)
+
     def select(self, query):
         """
         Выбор данных из файла с применением фильтрации
@@ -71,7 +75,8 @@ class Connector:
                 for i in source_data:
                     if i[key_filter[0]] == value_filter[0]:
                         res_data.append(i)
-                return res_data
+                self.replace(res_data)
+                return self.connect()
 
     def delete(self, query):
         """
@@ -92,7 +97,8 @@ class Connector:
                         continue
                     else:
                         res_data.append(i)
-                return res_data
+                self.replace(res_data)
+                return self.connect()
 
 if __name__ == "__main__":
     df = Connector('df.json')

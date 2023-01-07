@@ -4,7 +4,7 @@ class Vacancy:
     __slots__ = ("name", "href", "company", "experience", "salary", "description",
                  "salary_for_comparison", "__filename", "count")
 
-    def __init__(self, name, href, company, experience, salary, description, filename):
+    def __init__(self, name, href, company, experience, salary, description, filename, count_vac):
         self.name = name
         self.href = href
         self.company = company
@@ -15,12 +15,7 @@ class Vacancy:
             self.salary = salary[0:2] + " " + salary[2:]
         self.description = description
         self.__filename = filename
-        if self.__class__.__name__ == "HHVacancy":
-            self.hh_vacancies.append(self)
-            self.count = len(self.hh_vacancies)
-        elif self.__class__.__name__ == "SJVacancy":
-            self.sj_vacancies.append(self)
-            self.count = len(self.sj_vacancies)
+        self.count = count_vac
 
     def __gt__(self, other):
         return self.salary_for_comparison > other.salary_for_comparison

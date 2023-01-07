@@ -38,7 +38,7 @@ class Engine(ABC):
         return self.__count + other
 
     @property
-    def filename(self):
+    def filename_json(self):
         return self.__filename
 
     @property
@@ -106,8 +106,8 @@ class HH(Engine):
             if self.count == self.quantity:
                 break
 
-        self.get_connector(self.filename)
-        Connector.all_connectors[self.filename].insert(res_data)
+        self.get_connector(self.filename_json)
+        Connector.all_connectors[self.filename_json].insert(res_data)
 
 
 class SuperJob(Engine):
@@ -165,8 +165,8 @@ class SuperJob(Engine):
             if self.count == self.quantity:
                 break
 
-        self.get_connector(self.filename)
-        Connector.all_connectors[self.filename].insert(res_data)
+        self.get_connector(self.filename_json)
+        Connector.all_connectors[self.filename_json].insert(res_data)
 
 if __name__ == "__main__":
     hh1 = HH(100, "python")
