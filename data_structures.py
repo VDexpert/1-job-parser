@@ -29,6 +29,7 @@ class StackVacancies():
         while node:
             l.append(node.data)
             node = node.next_node
+        l.reverse()
         return l
 
 class LinkedListVacancies():
