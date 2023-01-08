@@ -76,7 +76,7 @@ class HH(Engine):
             req_vac = rq.get(self.__url + "/" + id_vac)
             experience = req_vac.json()["experience"]["name"].lower()
 
-            description = vac["snippet"]["responsibility"]
+            description = req_vac.json()["description"]
             salary = "По договорённости"
             rate_salary = 1
             if vac["salary"]:
