@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import requests as rq
 from connector import Connector
+from bs4 import BeautifulSoup
+
 
 class Engine(ABC):
     all_engines = {}
@@ -76,7 +78,9 @@ class HH(Engine):
             req_vac = rq.get(self.__url + "/" + id_vac)
             experience = req_vac.json()["experience"]["name"].lower()
 
-            description = req_vac.json()["description"]
+            source_description = req_vac.json()["description"]
+            description = BeautifulSoup(source_description, features="html.parser").text
+
             salary = "По договорённости"
             rate_salary = 1
             if vac["salary"]:
