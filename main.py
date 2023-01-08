@@ -30,7 +30,7 @@ def starter():
 
     data_hh = Connector.all_connectors[hh_engine.filename_json].connect()
     print("\n", "*" * 10, "Форматирование данных с сайта hh.ru", "*" * 10, "\n")
-    push_to_stack_by_init_vacancy(HHVacancy, stack_hh_all, data_hh, hh_engine.filename_json, quantity=quantity_vac)
+    add_to_structure(HHVacancy, stack_hh_all, data_hh, hh_engine.filename_json, quantity=quantity_vac)
 
     outfile_hh = f"HH-vacancies-{hh_engine.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_hh}", "*" * 10, "\n")
@@ -44,7 +44,7 @@ def starter():
 
     data_sj = Connector.all_connectors[sj_engine.filename_json].connect()
     print("\n", "*" * 10, "Форматирование данных с сайта superjob.ru", "*" * 10, "\n")
-    push_to_stack_by_init_vacancy(SJVacancy, stack_sj_all, data_sj, sj_engine.filename_json, quantity=quantity_vac)
+    add_to_structure(SJVacancy, stack_sj_all, data_sj, sj_engine.filename_json, quantity=quantity_vac)
 
     outfile_sj = f"SJ-vacancies-{sj_engine.key_word}.csv"
     print("\n", "*" * 10, f"Загрузка данных в файл {outfile_sj}", "*" * 10, "\n")
@@ -125,18 +125,20 @@ def starter():
         outfile_hh_select = f"HH-select-vacancies-for-{id_sel_exper}.csv"
         print("\n", "*" * 10, f"Отбор данных в файл {outfile_hh_select}", "*" * 10, "\n")
         selecting_json_hh = Connector.all_connectors[hh_engine.filename_json].select(query_sel)
-        stack_hh_selecting = StackVacancies()
-        push_to_stack_by_init_vacancy(HHVacancy, stack_hh_selecting, selecting_json_hh, hh_engine.filename_json)
-        write_vac_to_outfile(stack_hh_selecting.to_list(), outfile_hh_select, HHVacancy.get_count_of_vacancy(hh_engine.filename_json))
+        ll_hh_selecting = LinkedListVacancies()
+        add_to_structure(HHVacancy, ll_hh_selecting, selecting_json_hh, hh_engine.filename_json)
+        write_vac_to_outfile(ll_hh_selecting.to_list(), outfile_hh_select, HHVacancy.get_count_of_vacancy(hh_engine.filename_json))
         print("\n", "*" * 10, f"Селективные данные в файле {outfile_hh_select}", "*" * 10, "\n")
 
         outfile_sj_select = f"SJ-select-vacancies-for-{id_sel_exper}.csv"
         print("\n", "*" * 10, f"Отбор данных в файл {outfile_sj_select}", "*" * 10, "\n")
         selecting_json_sj = Connector.all_connectors[sj_engine.filename_json].select(query_sel)
-        stack_sj_selecting = StackVacancies()
-        push_to_stack_by_init_vacancy(SJVacancy, stack_sj_selecting, selecting_json_sj, hh_engine.filename_json)
-        write_vac_to_outfile(stack_sj_selecting.to_list(), outfile_sj_select, SJVacancy.get_count_of_vacancy(sj_engine.filename_json))
+        ll_sj_selecting = LinkedListVacancies()
+        add_to_structure(SJVacancy, ll_sj_selecting, selecting_json_sj, hh_engine.filename_json)
+        write_vac_to_outfile(ll_sj_selecting.to_list(), outfile_sj_select, SJVacancy.get_count_of_vacancy(sj_engine.filename_json))
         print("\n", "*" * 10, f"Селективные данные в файле {outfile_sj_select}", "*" * 10, "\n")
+
+        search_vacancy(ll_hh_selecting, ll_sj_selecting)
 
     elif additionals == "4":
 
@@ -159,18 +161,20 @@ def starter():
         outfile_hh_del = f"HH-delete-vacancies-for-{id_del_exper}.csv"
         print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_hh_del}", "*" * 10, "\n")
         without_deleting_json_hh = Connector.all_connectors[hh_engine.filename_json].delete(query_del)
-        stack_hh_without_deleting = StackVacancies()
-        push_to_stack_by_init_vacancy(HHVacancy, stack_hh_without_deleting, without_deleting_json_hh, hh_engine.filename_json)
-        write_vac_to_outfile(stack_hh_without_deleting.to_list(), outfile_hh_del, HHVacancy.get_count_of_vacancy(hh_engine.filename_json))
+        ll_hh_without_deleting = LinkedListVacancies()
+        add_to_structure(HHVacancy, ll_hh_without_deleting, without_deleting_json_hh, hh_engine.filename_json)
+        write_vac_to_outfile(ll_hh_without_deleting.to_list(), outfile_hh_del, HHVacancy.get_count_of_vacancy(hh_engine.filename_json))
         print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_hh_del}", "*" * 10, "\n")
 
         outfile_sj_del = f"SJ-delete_vacancies-for-{id_del_exper}.csv"
         print("\n", "*" * 10, f"Удаление ненужных данных и загрузка нужных в файл {outfile_sj_del}", "*" * 10, "\n")
         without_deleting_json_sj = Connector.all_connectors[sj_engine.filename_json].delete(query_del)
-        stack_sj_without_deleting = StackVacancies()
-        push_to_stack_by_init_vacancy(SJVacancy, stack_sj_without_deleting, without_deleting_json_sj, hh_engine.filename_json)
-        write_vac_to_outfile(stack_sj_without_deleting.to_list(), outfile_sj_del, SJVacancy.get_count_of_vacancy(sj_engine.filename_json))
+        ll_sj_without_deleting = LinkedListVacancies()
+        add_to_structure(SJVacancy, ll_sj_without_deleting, without_deleting_json_sj, hh_engine.filename_json)
+        write_vac_to_outfile(ll_sj_without_deleting.to_list(), outfile_sj_del, SJVacancy.get_count_of_vacancy(sj_engine.filename_json))
         print("\n", "*" * 10, f"Данные удалены. Нужные данные в файле {outfile_sj_del}", "*" * 10, "\n")
+
+        search_vacancy(ll_hh_without_deleting, ll_sj_without_deleting)
 
     del_temp_json(hh_engine.filename_json)
     del_temp_json(sj_engine.filename_json)
