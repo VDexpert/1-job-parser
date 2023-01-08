@@ -1,3 +1,5 @@
+from exceptions_classes import*
+
 class Node():
     def __init__(self, data, next_node):
         self.data = data
@@ -54,7 +56,7 @@ class LinkedListVacancies():
             if node.data.get_id() == id_vac:
                 return node.data
             node = node.next_node
-        raise NotImplementedError(f"Вакансия с номером {id_vac} не найдена в последней выгрузке. Скорректируйте запрос")
+        raise NotFoundIdVacancy(f"Вакансия с номером {id_vac} не найдена в последней выгрузке. Скорректируйте запрос")
 
     def to_list(self):
         l = []

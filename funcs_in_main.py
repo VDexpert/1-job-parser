@@ -1,5 +1,6 @@
 import os
 import csv
+from exceptions_classes import*
 
 
 def del_temp_json(filename):
@@ -60,7 +61,13 @@ def search_vacancy(ll_vac_hh, ll_vac_sj):
 
         id_vac = int(query.split()[1])
         source = query.split()[0].upper()
-        data = dict_ll[source].search_by_id(id_vac)
+
+        try:
+            data = dict_ll[source].search_by_id(id_vac)
+        except NotFoundIdVacancy as e:
+            print(f"\n{e}\n")
+            continue
+
         print(f"\nПодробное описание вакансии № {id_vac} c последней выгрузки с сайта {source}: \n"
               f"{data}\n"
               f"{data.description}\n")
